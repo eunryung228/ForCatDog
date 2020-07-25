@@ -7,11 +7,15 @@ public class ScriptManager : MonoBehaviour
 {
     public GameObject m_panel;
     public GameObject m_scriptWindow;
-    public Text[] m_texts; // 0: 발화자 1: 내용
+    public Text[] m_texts; // 0: 발화자 1: 내용 2: 오브젝트 내용
 
     public GameObject m_selection;
     public Text[] m_selectionTexts; // 선택지 갯수 2개?
     public Image[] m_selectionImages;
+
+    public GameObject m_object;
+    public Image m_objectImage;
+
 
     private AudioManager mgrAudio;
     
@@ -31,9 +35,12 @@ public class ScriptManager : MonoBehaviour
     private bool m_pointer;
 
 
-    public void ClickTempDialougeButton()
+    public void TempButton()
     {
-        ShowScript("cookie", 0);
+        List<LoadJson.Script> scripts = LoadJson.scriptDic["happy"];
+        scripts[0].InnerScripts[0].finished = true;
+
+        ShowObject("happy", 1);
     }
 
 
@@ -42,10 +49,16 @@ public class ScriptManager : MonoBehaviour
         m_panel.SetActive(true);
         m_scriptWindow.SetActive(true);
     }
+    public void ObjectLayerOn()
+    {
+        m_panel.SetActive(true);
+        m_object.SetActive(true);
+    }
     public void ScriptLayerOff()
     {
         m_panel.SetActive(false);
         m_scriptWindow.SetActive(false);
+        m_object.SetActive(false);
     }
 
     private void ActiveSelection()
@@ -70,8 +83,33 @@ public class ScriptManager : MonoBehaviour
         }
     }
 
+    void PlayKeyboard(int c)
+    {
+        switch (c % 5)
+        {
+            case 0:
+                mgrAudio.Play("keyboard1");
+                break;
+            case 1:
+                mgrAudio.Play("keyboard2");
+                break;
+            case 2:
+                mgrAudio.Play("keyboard3");
+                break;
+            case 3:
+                mgrAudio.Play("keyboard4");
+                break;
+            case 4:
+                mgrAudio.Play("keyboard5");
+                break;
+            default:
+                break;
+        }
+    }
 
-    private void SelectionPointer()
+
+    // Selection
+    private void SelectionPointer() // 선택지 여러 개? 될 수도 있어서 코드 수정하기
     {
         int pointer = (m_pointer == true) ? 1 : 0; // 더 깔쌈한 처리 방식 없을까 ...
         int nPointer = (m_pointer == true) ? 0 : 1;
@@ -80,7 +118,7 @@ public class ScriptManager : MonoBehaviour
         m_selectionImages[nPointer].gameObject.SetActive(false);
     }
 
-    public void SelectionScript() // 포켓몬처럼 위아래 슬라이드 해서 스페이스바로 선택 어떤지
+    private void SelectionScript() // 포켓몬처럼 위아래 슬라이드 해서 스페이스바로 선택 어떤지
     {
         listSentences.Clear();
         listSpeakers.Clear();
@@ -111,7 +149,7 @@ public class ScriptManager : MonoBehaviour
         }
 
         if (isCorrect)
-            scripts[m_scriptNum].InnerScripts[0].finished = true;
+            scripts[m_scriptNum].InnerScripts[0].finished = true; // 요기 틀리면 false로 바꾸는 걸로 코드 수정
 
 
         m_isSelect = false;
@@ -121,6 +159,52 @@ public class ScriptManager : MonoBehaviour
     }
 
 
+    // Object
+    public void ShowObject(string script, int num)
+    {
+        List<LoadJson.Script> scripts = LoadJson.scriptDic[script];
+        if (scripts[num].InnerScripts[0].finished) // 이미 완료했다면
+        {
+            Debug.Log("이미 완료한 이벤트");
+            return;
+        }
+
+        scripts[num].InnerScripts[0].finished = true;
+        listSpeakers.Add(scripts[num].InnerScripts[0].name);
+        listSentences.Add(scripts[num].InnerScripts[0].script);
+
+        m_objectImage.sprite = Resources.Load<Sprite>("Temp/" + listSpeakers[0]) as Sprite; // 이미지 설정. 합치면 경로 달라져야 함
+        ObjectLayerOn();
+        StartCoroutine(ObjectCoroutine());
+    }
+
+
+    IEnumerator ObjectCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+        Destroy(GameObject.Find(listSpeakers[0])); // 여기서 오브젝트 사라지면 될 듯
+
+        m_scriptWindow.SetActive(true);
+        m_isFinished = false;
+        for (int i = 0; i < listSentences[count].Length; i++)
+        {
+            if (m_isSkip) // 요건 짧으니까 스킵이 안 되게끔 할까?
+            {
+                m_texts[2].text = listSentences[count];
+                m_isSkip = false;
+                break;
+            }
+
+            m_texts[2].text += listSentences[count][i];
+            PlayKeyboard(i);
+            yield return new WaitForSeconds(0.035f);
+        }
+        m_isFinished = true;
+        yield break;
+    }
+
+
+    // Script
     public void ShowScript(string script, int num)
     {
         List<LoadJson.Script> scripts = LoadJson.scriptDic[script];
@@ -130,6 +214,7 @@ public class ScriptManager : MonoBehaviour
             return;
         }
 
+        scripts[num].InnerScripts[0].finished = true;
         m_scriptName = script;
         m_scriptNum = num;
 
@@ -179,26 +264,7 @@ public class ScriptManager : MonoBehaviour
             }
 
             m_texts[1].text += listSentences[count][i];
-            switch (i%5)
-            {
-                case 0:
-                    mgrAudio.Play("keyboard1");
-                    break;
-                case 1:
-                    mgrAudio.Play("keyboard2");
-                    break;
-                case 2:
-                    mgrAudio.Play("keyboard3");
-                    break;
-                case 3:
-                    mgrAudio.Play("keyboard4");
-                    break;
-                case 4:
-                    mgrAudio.Play("keyboard5");
-                    break;
-                default:
-                    break;
-            }
+            PlayKeyboard(i);
             yield return new WaitForSeconds(0.035f);
         }
         m_isFinished = true;
