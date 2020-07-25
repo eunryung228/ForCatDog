@@ -125,6 +125,10 @@ public class ObjectManager : MonoBehaviour
         mgrScript = FindObjectOfType<ScriptManager>();
     }
 
+
+    // 맨 처음에 맵 나오고 난 뒤에 처음에 이동하기 시작하면 Script 호출.
+    // mgrScript.ShowScript("entry", 0);
+
     void Update() // temp. 실제로는 이 방식 아님.
     {
         if (!mgrScript.GetLayerState() && Input.GetMouseButtonDown(0))

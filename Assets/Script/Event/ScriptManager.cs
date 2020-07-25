@@ -17,6 +17,7 @@ public class ScriptManager : MonoBehaviour
     public GameObject m_object;
     public Image m_objectImage;
 
+    public Image m_endingImage;
 
     private AudioManager mgrAudio;
     
@@ -29,16 +30,30 @@ public class ScriptManager : MonoBehaviour
     private string m_scriptName = "";
     private int m_scriptNum = 0;
     private int m_selectStart = 0;
+    private int m_endingNum = 0;
 
     private bool m_isFinished;
     private bool m_isSelect;
     private bool m_isSkip;
     private bool m_pointer;
+    private bool m_isEnding;
 
 
     public bool GetLayerState()
     {
         return m_panel.activeSelf;
+    }
+
+
+    public void EndingLayerOn()
+    {
+        m_scriptWindow.SetActive(true);
+        m_speakerWindow.SetActive(true);
+    }
+    public void EndingLayerOff()
+    {
+        m_scriptWindow.SetActive(false);
+        m_speakerWindow.SetActive(false);
     }
 
     public void ScriptLayerOn()
@@ -312,6 +327,85 @@ public class ScriptManager : MonoBehaviour
         yield break;
     }
 
+
+    public void ShowFinalScene()
+    {
+        FindObjectOfType<BGMManager>().ChangeMusic(1);
+
+        m_scriptName = "final";
+        m_endingNum = -1;
+
+        m_isEnding = true;
+        m_endingImage.gameObject.SetActive(true);
+        StartCoroutine(FinalScene());
+    }
+
+    private void SetFinalScene()
+    {
+        ResetText();
+        EndingLayerOff();
+        List<LoadJson.Script> scripts = LoadJson.scriptDic[m_scriptName];
+
+        for (int i = 0; i < scripts[m_endingNum].InnerScripts.Count; i++)
+        {
+            if (scripts[m_endingNum].InnerScripts[i].number == -1)
+            {
+                listSentences.Add(scripts[m_endingNum].InnerScripts[i].script);
+                listSpeakers.Add(scripts[m_endingNum].InnerScripts[i].name);
+            }
+        }
+
+        m_endingImage.sprite = Resources.Load<Sprite>("EndingImage/" + m_endingNum) as Sprite;
+        StartCoroutine(FinalScene());
+    }
+
+    IEnumerator FinalScene()
+    {
+        yield return new WaitForSeconds(2f);
+
+        if (m_endingNum == -1)
+        {
+            m_endingNum = 0;
+            SetFinalScene();
+        }
+        else if (m_endingNum == -2)
+        {
+            m_endingNum = 100;
+            m_scriptWindow.SetActive(false);
+            EndingLayerOff();
+        }
+        else
+        {
+            EndingLayerOn();
+            StartCoroutine(FinalCoroutine());
+        }
+    }
+
+    IEnumerator FinalCoroutine()
+    {
+        m_isFinished = false;
+        m_texts[0].text = listSpeakers[count];
+
+        for (int i = 0; i < listSentences[count].Length; i++)
+        {
+            if (m_isSkip)
+            {
+                m_texts[1].text = listSentences[count];
+                yield return new WaitForSeconds(0.3f); // 스킵 너무 호다닥 돼서 텀 추가.
+                m_isSkip = false;
+                m_isFinished = true;
+                break;
+            }
+
+            m_texts[1].text += listSentences[count][i];
+            PlayKeyboard(i);
+            yield return new WaitForSeconds(0.05f);
+        }
+        m_isFinished = true;
+        yield break;
+    }
+
+
     private void Start()
     {
         mgrAudio = FindObjectOfType<AudioManager>();
@@ -336,6 +430,44 @@ public class ScriptManager : MonoBehaviour
         listSentences.Clear();
         ResetText();
         ScriptLayerOff();
+
+        if (m_endingNum == -2)
+        {
+            m_endingImage.sprite = Resources.Load<Sprite>("EndingImage/final") as Sprite;
+            StartCoroutine(FinalScene());
+            // 씬 전환
+        }
+
+        if (m_isEnding)
+        {
+            m_isEnding = false;
+            List<LoadJson.Script> scripts = LoadJson.scriptDic["final"];
+            for (int i = 0; i < scripts[m_endingNum].InnerScripts.Count; i++)
+            {
+                if (scripts[m_endingNum].InnerScripts[i].number == -1)
+                {
+                    listSentences.Add(scripts[m_endingNum].InnerScripts[i].script);
+                    listSpeakers.Add(scripts[m_endingNum].InnerScripts[i].name);
+                }
+            }
+            m_scriptWindow.SetActive(true);
+            m_endingNum = -2;
+            StartCoroutine(EndingCoroutine());
+        }
+    }
+
+    IEnumerator EndingCoroutine()
+    {
+        m_isFinished = false;
+        m_texts[0].text = listSpeakers[count];
+
+        for (int i = 0; i < listSentences[count].Length; i++)
+        {
+            m_texts[2].text += listSentences[count][i];
+            yield return new WaitForSeconds(0.1f);
+        }
+        m_isFinished = true;
+        yield break;
     }
 
 
@@ -363,23 +495,48 @@ public class ScriptManager : MonoBehaviour
             {
                 count++;
 
-                if (count >= listSentences.Count)
+                if (m_isEnding)
                 {
-                    StopAllCoroutines();
-                    if (m_isSelect)
+                    if (count >= listSentences.Count)
                     {
-                        m_isFinished = false;
-                        m_pointer = false;
-                        ActiveSelection();
+                        StopAllCoroutines();
+                        m_endingNum += 1;
+                        if (m_endingNum == 6) // 맞나?
+                        {
+                            m_scriptWindow.SetActive(false);
+                            ExitScripts();
+                        }
+                        else
+                            SetFinalScene();
                     }
                     else
-                        ExitScripts();
+                    {
+                        m_texts[1].text = "";
+                        StopAllCoroutines();
+                        StartCoroutine(FinalCoroutine());
+                    }
                 }
                 else
                 {
-                    m_texts[1].text = "";
-                    StopAllCoroutines();
-                    StartCoroutine(ScriptCoroutine());
+                    if (count >= listSentences.Count)
+                    {
+                        StopAllCoroutines();
+                        if (m_isSelect)
+                        {
+                            m_isFinished = false;
+                            m_pointer = false;
+                            ActiveSelection();
+                        }
+                        else
+                            ExitScripts();
+                    }
+                    else
+                    {
+                        m_texts[1].text = "";
+                        m_texts[2].text = "";
+                        StopAllCoroutines();
+                        StartCoroutine(ScriptCoroutine());
+                    }
                 }
             }
         }
