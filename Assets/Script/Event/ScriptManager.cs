@@ -35,15 +35,6 @@ public class ScriptManager : MonoBehaviour
     private bool m_pointer;
 
 
-    public void TempButton()
-    {
-        List<LoadJson.Script> scripts = LoadJson.scriptDic["happy"];
-        scripts[0].InnerScripts[0].finished = true;
-
-        ShowObject("happy", 1);
-    }
-
-
     public void ScriptLayerOn()
     {
         m_panel.SetActive(true);
@@ -173,7 +164,7 @@ public class ScriptManager : MonoBehaviour
         listSpeakers.Add(scripts[num].InnerScripts[0].name);
         listSentences.Add(scripts[num].InnerScripts[0].script);
 
-        m_objectImage.sprite = Resources.Load<Sprite>("Temp/" + listSpeakers[0]) as Sprite; // 이미지 설정. 합치면 경로 달라져야 함
+        m_objectImage.sprite = Resources.Load<Sprite>("Object/" + listSpeakers[0]) as Sprite; // 이미지 설정.
         ObjectLayerOn();
         StartCoroutine(ObjectCoroutine());
     }
