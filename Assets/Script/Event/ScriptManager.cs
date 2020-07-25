@@ -122,6 +122,7 @@ public class ScriptManager : MonoBehaviour
         InActiveSelection();
         ResetText();
 
+        bool another = false;
         bool check = false;
         bool isObj = false;
         int order = (m_pointer == false) ? 1 : 2; // 우선은 두 개니까
@@ -129,7 +130,7 @@ public class ScriptManager : MonoBehaviour
         List<LoadJson.Script> scripts = LoadJson.scriptDic[m_scriptName];
         for (int i = m_selectStart; i < scripts[m_scriptNum].InnerScripts.Count; i++)
         {
-            if (scripts[m_scriptNum].InnerScripts[i].number / 10 == order)
+            if (!another && scripts[m_scriptNum].InnerScripts[i].number / 10 == order)
             {
                 if (!check) // 첫 문장 넘어가기
                 {
@@ -145,10 +146,36 @@ public class ScriptManager : MonoBehaviour
                     listSpeakers.Add(scripts[m_scriptNum].InnerScripts[i].name);
                 }
             }
+            else
+            {
+                if (scripts[m_scriptNum].InnerScripts[i].number == 0)
+                {
+                    if (another || !scripts[m_scriptNum].InnerScripts[0].finished)
+                        break;
+                    listSentences.Add(scripts[m_scriptNum].InnerScripts[i].script);
+                    listSpeakers.Add(scripts[m_scriptNum].InnerScripts[i].name);
+                    another = true;
+                    m_selectStart = i + 1;
+                }
+                else
+                {
+                    if (another)
+                    {
+                        if (scripts[m_scriptNum].InnerScripts[i].number / 10 == 1 && m_selectionTexts[0].text == "")
+                        {
+                            m_selectionTexts[0].text = scripts[m_scriptNum].InnerScripts[i].script;
+                        }
+                        else if (scripts[m_scriptNum].InnerScripts[i].number / 10 == 2 && m_selectionTexts[1].text == "")
+                        {
+                            m_selectionTexts[1].text = scripts[m_scriptNum].InnerScripts[i].script;
+                        }
+                    }
+                }
+            }
         }
 
-
-        m_isSelect = false; // 선택지 연속인 경우 대비해서 추후 수정하기
+        if (!another)
+            m_isSelect = false;
         count = 0;
         StopAllCoroutines();
 
@@ -197,7 +224,7 @@ public class ScriptManager : MonoBehaviour
             if (m_isSkip) // 요건 짧으니까 스킵이 안 되게끔 할까?
             {
                 m_texts[2].text = listSentences[count];
-                yield return new WaitForSeconds(0.4f);
+                yield return new WaitForSeconds(0.3f);
                 m_isSkip = false;
                 break;
             }
@@ -235,6 +262,8 @@ public class ScriptManager : MonoBehaviour
             }
             else if (scripts[m_scriptNum].InnerScripts[i].number == 0)
             {
+                if (m_isSelect)
+                    break;
                 listSentences.Add(scripts[m_scriptNum].InnerScripts[i].script);
                 listSpeakers.Add(scripts[m_scriptNum].InnerScripts[i].name);
                 m_isSelect = true;
@@ -266,14 +295,15 @@ public class ScriptManager : MonoBehaviour
             if (m_isSkip)
             {
                 m_texts[1].text = listSentences[count];
-                yield return new WaitForSeconds(0.4f); // 스킵 너무 호다닥 돼서 텀 추가. 시간적 여유가 된다면 냥냥 발 커서같은 귀여운 거 추가
+                yield return new WaitForSeconds(0.3f); // 스킵 너무 호다닥 돼서 텀 추가. 시간적 여유가 된다면 냥냥 발 커서같은 귀여운 거 추가
                 m_isSkip = false;
+                m_isFinished = true;
                 break;
             }
 
             m_texts[1].text += listSentences[count][i];
             PlayKeyboard(i);
-            yield return new WaitForSeconds(0.035f);
+            yield return new WaitForSeconds(0.05f);
         }
         m_isFinished = true;
         yield break;
@@ -336,6 +366,7 @@ public class ScriptManager : MonoBehaviour
                     if (m_isSelect)
                     {
                         m_isFinished = false;
+                        m_pointer = false;
                         ActiveSelection();
                     }
                     else

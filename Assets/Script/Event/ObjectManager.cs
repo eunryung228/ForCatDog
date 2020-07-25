@@ -60,6 +60,41 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
+    private void ClickNavi()
+    {
+        m_scriptName = "navi";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (!scripts[0].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 0);
+        else if (scripts[1].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 2);
+        else
+            return;
+    }
+
+    private void ClickThread()
+    {
+        m_scriptName = "navi";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (scripts[0].InnerScripts[0].finished && !scripts[2].InnerScripts[0].finished)
+            mgrScript.ShowObject(m_scriptName, 1);
+        else
+            return;
+    }
+
+    private void ClickWanso()
+    {
+        m_scriptName = "wanso";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (!scripts[0].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 0);
+        else
+            return;
+    }
+
 
     private void Start()
     {
@@ -86,6 +121,12 @@ public class ObjectManager : MonoBehaviour
                     ClickJjongI();
                 else if (m_objectName == "호수")
                     ClickPond();
+                else if (m_objectName == "나비")
+                    ClickNavi();
+                else if (m_objectName == "실타래")
+                    ClickThread();
+                else if (m_objectName == "완소")
+                    ClickWanso();
                 else
                     m_objectName = "";
             }
