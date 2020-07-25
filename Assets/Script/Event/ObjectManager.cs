@@ -31,10 +31,35 @@ public class ObjectManager : MonoBehaviour
         scripts = LoadJson.scriptDic[m_scriptName];
 
         if (scripts[0].InnerScripts[0].finished && !scripts[2].InnerScripts[0].finished)
-            mgrScript.ShowObject("happy", 1);
+            mgrScript.ShowObject(m_scriptName, 1);
         else // 이벤트 발생 x
             return;
     }
+
+    private void ClickJjongI()
+    {
+        m_scriptName = "jjongi";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (!scripts[0].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 0);
+        else if (scripts[1].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 2);
+        else // 이벤트 발생 x
+            return;
+    }
+
+    private void ClickPond()
+    {
+        m_scriptName = "jjongi";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (scripts[0].InnerScripts[0].finished && !scripts[2].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 1);
+        else // 이벤트 발생 x
+            return;
+    }
+
 
     private void Start()
     {
@@ -57,6 +82,10 @@ public class ObjectManager : MonoBehaviour
                     ClickHappy();
                 else if (m_objectName == "달력")
                     ClickCalendar();
+                else if (m_objectName == "쫑이")
+                    ClickJjongI();
+                else if (m_objectName == "호수")
+                    ClickPond();
                 else
                     m_objectName = "";
             }

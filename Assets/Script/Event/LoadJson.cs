@@ -14,10 +14,10 @@ public class LoadJson : MonoBehaviour
     }
 
 
-    private string[] scriptName = { "happy" };
+    private string[] scriptName = { "happy","jjongi" };
     private string[] scriptIdx = { "name", "script", "number" };
     private string[] scriptOrder = { "first", "second", "third", "fourth", "fifth", "sixth" };
-    private int[] scriptOrderIdx = { 3 };
+    private int[] scriptOrderIdx = { 3, 3 };
 
     public static Dictionary<string, List<Script>> scriptDic = new Dictionary<string, List<Script>>();
 

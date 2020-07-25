@@ -60,6 +60,7 @@ public class ScriptManager : MonoBehaviour
     private void ActiveSelection()
     {
         m_selection.SetActive(true);
+        m_selectionImages[0].gameObject.SetActive(true);
         m_selectionImages[1].gameObject.SetActive(false);
     }
     private void InActiveSelection()
@@ -105,7 +106,7 @@ public class ScriptManager : MonoBehaviour
 
 
     // Selection
-    private void SelectionPointer() // 선택지 여러 개? 될 수도 있어서 코드 수정하기
+    private void SelectionPointer() // 선택지 여러 개? 될 수도 있어서 코드 수정하기 (추후)
     {
         int pointer = (m_pointer == true) ? 1 : 0; // 더 깔쌈한 처리 방식 없을까 ...
         int nPointer = (m_pointer == true) ? 0 : 1;
@@ -121,8 +122,8 @@ public class ScriptManager : MonoBehaviour
         InActiveSelection();
         ResetText();
 
-        bool isCorrect = false;
         bool check = false;
+        bool isObj = false;
         int order = (m_pointer == false) ? 1 : 2; // 우선은 두 개니까
 
         List<LoadJson.Script> scripts = LoadJson.scriptDic[m_scriptName];
@@ -133,8 +134,10 @@ public class ScriptManager : MonoBehaviour
                 if (!check) // 첫 문장 넘어가기
                 {
                     check = true;
-                    if (scripts[m_scriptNum].InnerScripts[i].number % 10 == 5)
-                        isCorrect = true;
+                    if (scripts[m_scriptNum].InnerScripts[i].number % 10 == 0)
+                        scripts[m_scriptNum].InnerScripts[0].finished = false;
+                    else if (scripts[m_scriptNum].InnerScripts[i].number % 10 == 3) // object
+                        isObj = true;
                 }
                 else
                 {
@@ -144,14 +147,21 @@ public class ScriptManager : MonoBehaviour
             }
         }
 
-        if (isCorrect)
-            scripts[m_scriptNum].InnerScripts[0].finished = true; // 요기 틀리면 false로 바꾸는 걸로 코드 수정
 
-
-        m_isSelect = false;
+        m_isSelect = false; // 선택지 연속인 경우 대비해서 추후 수정하기
         count = 0;
         StopAllCoroutines();
-        StartCoroutine(ScriptCoroutine());
+
+        if (isObj)
+        {
+            m_objectImage.sprite = Resources.Load<Sprite>("Object/" + listSpeakers[0]) as Sprite;
+            ObjectLayerOn();
+            StartCoroutine(ObjectCoroutine());
+        }
+        else
+        {
+            StartCoroutine(ScriptCoroutine());
+        }
     }
 
 
@@ -187,6 +197,7 @@ public class ScriptManager : MonoBehaviour
             if (m_isSkip) // 요건 짧으니까 스킵이 안 되게끔 할까?
             {
                 m_texts[2].text = listSentences[count];
+                yield return new WaitForSeconds(0.4f);
                 m_isSkip = false;
                 break;
             }
@@ -255,6 +266,7 @@ public class ScriptManager : MonoBehaviour
             if (m_isSkip)
             {
                 m_texts[1].text = listSentences[count];
+                yield return new WaitForSeconds(0.4f); // 스킵 너무 호다닥 돼서 텀 추가. 시간적 여유가 된다면 냥냥 발 커서같은 귀여운 거 추가
                 m_isSkip = false;
                 break;
             }
