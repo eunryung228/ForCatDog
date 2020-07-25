@@ -7,6 +7,7 @@ public class ScriptManager : MonoBehaviour
 {
     public GameObject m_panel;
     public GameObject m_scriptWindow;
+    public GameObject m_speakerWindow;
     public Text[] m_texts; // 0: 발화자 1: 내용 2: 오브젝트 내용
 
     public GameObject m_selection;
@@ -44,6 +45,7 @@ public class ScriptManager : MonoBehaviour
     {
         m_panel.SetActive(true);
         m_scriptWindow.SetActive(true);
+        m_speakerWindow.SetActive(true);
     }
     public void ObjectLayerOn()
     {
@@ -54,6 +56,7 @@ public class ScriptManager : MonoBehaviour
     {
         m_panel.SetActive(false);
         m_scriptWindow.SetActive(false);
+        m_speakerWindow.SetActive(false);
         m_object.SetActive(false);
     }
 

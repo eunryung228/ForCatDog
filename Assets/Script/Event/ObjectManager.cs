@@ -95,6 +95,30 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
+    private void ClickNero()
+    {
+        m_scriptName = "nero";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (!scripts[0].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 0);
+        else if (scripts[1].InnerScripts[0].finished)
+            mgrScript.ShowScript(m_scriptName, 2);
+        else
+            return;
+    }
+    
+    private void ClickFish()
+    {
+        m_scriptName = "nero";
+        scripts = LoadJson.scriptDic[m_scriptName];
+
+        if (scripts[0].InnerScripts[0].finished && !scripts[2].InnerScripts[0].finished)
+            mgrScript.ShowObject(m_scriptName, 1);
+        else
+            return;
+    }
+
 
     private void Start()
     {
@@ -127,6 +151,10 @@ public class ObjectManager : MonoBehaviour
                     ClickThread();
                 else if (m_objectName == "완소")
                     ClickWanso();
+                else if (m_objectName == "네로")
+                    ClickNero();
+                else if (m_objectName == "고등어")
+                    ClickFish();
                 else
                     m_objectName = "";
             }
