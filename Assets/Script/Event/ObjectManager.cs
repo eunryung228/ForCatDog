@@ -43,7 +43,7 @@ public class ObjectManager : MonoBehaviour
 
     void Update() // temp. 실제로는 이 방식 아님.
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!mgrScript.GetLayerState() && Input.GetMouseButtonDown(0))
         {
             Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero, 0f);
@@ -51,7 +51,7 @@ public class ObjectManager : MonoBehaviour
             if (hit.collider != null)
             {
                 m_objectName = hit.collider.name;
-                Debug.Log(hit.collider.name); // 로그 확인
+                // Debug.Log(hit.collider.name); // 로그 확인
 
                 if (m_objectName == "해피") // 해당 오브젝트 (여기서는 해피)랑 충돌되고 스페이스바 클릭하면 아래 함수 실행되게 하시면 됩니다.
                     ClickHappy();

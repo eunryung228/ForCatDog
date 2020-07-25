@@ -35,6 +35,11 @@ public class ScriptManager : MonoBehaviour
     private bool m_pointer;
 
 
+    public bool GetLayerState()
+    {
+        return m_panel.activeSelf;
+    }
+
     public void ScriptLayerOn()
     {
         m_panel.SetActive(true);
