@@ -12,7 +12,7 @@ public class ObjectManager : MonoBehaviour
 
 
     // Click 함수: 오브젝트 상호작용 함수
-    private void ClickHappy()
+    public void ClickHappy()
     {
         m_scriptName = "happy";
         scripts = LoadJson.scriptDic[m_scriptName];
@@ -25,7 +25,7 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
-    private void ClickCalendar()
+    public void ClickCalendar()
     {
         m_scriptName = "happy";
         scripts = LoadJson.scriptDic[m_scriptName];
@@ -36,20 +36,23 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
-    private void ClickJjongI()
+    public void ClickJjongI()
     {
-        m_scriptName = "jjongi";
-        scripts = LoadJson.scriptDic[m_scriptName];
+        if (mgrScript.GetLast() == "happy")
+        {
+            m_scriptName = "jjongi";
+            scripts = LoadJson.scriptDic[m_scriptName];
 
-        if (!scripts[0].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 0);
-        else if (scripts[1].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 2);
-        else // 이벤트 발생 x
-            return;
+            if (!scripts[0].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 0);
+            else if (scripts[1].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 2);
+            else // 이벤트 발생 x
+                return;
+        }
     }
 
-    private void ClickPond()
+    public void ClickPond()
     {
         m_scriptName = "jjongi";
         scripts = LoadJson.scriptDic[m_scriptName];
@@ -60,20 +63,23 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
-    private void ClickNavi()
+    public void ClickNavi()
     {
-        m_scriptName = "navi";
-        scripts = LoadJson.scriptDic[m_scriptName];
+        if (mgrScript.GetLast() == "jjongi")
+        {
+            m_scriptName = "navi";
+            scripts = LoadJson.scriptDic[m_scriptName];
 
-        if (!scripts[0].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 0);
-        else if (scripts[1].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 2);
-        else
-            return;
+            if (!scripts[0].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 0);
+            else if (scripts[1].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 2);
+            else
+                return;
+        }
     }
 
-    private void ClickThread()
+    public void ClickThread()
     {
         m_scriptName = "navi";
         scripts = LoadJson.scriptDic[m_scriptName];
@@ -84,31 +90,38 @@ public class ObjectManager : MonoBehaviour
             return;
     }
 
-    private void ClickWanso()
+    public void ClickWanso()
     {
-        m_scriptName = "wanso";
-        scripts = LoadJson.scriptDic[m_scriptName];
 
-        if (!scripts[0].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 0);
-        else
-            return;
+        if (mgrScript.GetLast() == "navi")
+        {
+            m_scriptName = "wanso";
+            scripts = LoadJson.scriptDic[m_scriptName];
+
+            if (!scripts[0].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 0);
+            else
+                return;
+        }
     }
 
-    private void ClickNero()
+    public void ClickNero()
     {
-        m_scriptName = "nero";
-        scripts = LoadJson.scriptDic[m_scriptName];
+        if (mgrScript.GetLast() == "wanso")
+        {
+            m_scriptName = "nero";
+            scripts = LoadJson.scriptDic[m_scriptName];
 
-        if (!scripts[0].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 0);
-        else if (scripts[1].InnerScripts[0].finished)
-            mgrScript.ShowScript(m_scriptName, 2);
-        else
-            return;
+            if (!scripts[0].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 0);
+            else if (scripts[1].InnerScripts[0].finished)
+                mgrScript.ShowScript(m_scriptName, 2);
+            else
+                return;
+        }
     }
-    
-    private void ClickFish()
+
+    public void ClickFish()
     {
         m_scriptName = "nero";
         scripts = LoadJson.scriptDic[m_scriptName];
@@ -123,45 +136,5 @@ public class ObjectManager : MonoBehaviour
     private void Start()
     {
         mgrScript = FindObjectOfType<ScriptManager>();
-    }
-
-
-    // 맨 처음에 맵 나오고 난 뒤에 처음에 이동하기 시작하면 Script 호출.
-    // mgrScript.ShowScript("entry", 0);
-
-    void Update() // temp. 실제로는 이 방식 아님.
-    {
-        if (!mgrScript.GetLayerState() && Input.GetMouseButtonDown(0))
-        {
-            Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero, 0f);
-
-            if (hit.collider != null)
-            {
-                m_objectName = hit.collider.name;
-                // Debug.Log(hit.collider.name); // 로그 확인
-
-                if (m_objectName == "해피") // 해당 오브젝트 (여기서는 해피)랑 충돌되고 스페이스바 클릭하면 아래 함수 실행되게 하시면 됩니다.
-                    ClickHappy();
-                else if (m_objectName == "달력")
-                    ClickCalendar();
-                else if (m_objectName == "쫑이")
-                    ClickJjongI();
-                else if (m_objectName == "호수")
-                    ClickPond();
-                else if (m_objectName == "나비")
-                    ClickNavi();
-                else if (m_objectName == "실타래")
-                    ClickThread();
-                else if (m_objectName == "완소")
-                    ClickWanso();
-                else if (m_objectName == "네로")
-                    ClickNero();
-                else if (m_objectName == "고등어")
-                    ClickFish();
-                else
-                    m_objectName = "";
-            }
-        }
     }
 }

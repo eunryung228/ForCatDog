@@ -28,6 +28,8 @@ public class ScriptManager : MonoBehaviour
     private int count = 0;
 
     private string m_scriptName = "";
+    private string m_last = "";
+
     private int m_scriptNum = 0;
     private int m_selectStart = 0;
     private int m_endingNum = 0;
@@ -38,6 +40,11 @@ public class ScriptManager : MonoBehaviour
     private bool m_pointer;
     private bool m_isEnding;
 
+
+    public string GetLast()
+    {
+        return m_last;
+    }
 
     public bool GetLayerState()
     {
@@ -219,6 +226,9 @@ public class ScriptManager : MonoBehaviour
             Debug.Log("이미 완료한 이벤트");
             return;
         }
+
+        m_scriptName = script;
+        m_scriptNum = num;
 
         scripts[num].InnerScripts[0].finished = true;
         listSpeakers.Add(scripts[num].InnerScripts[0].name);
@@ -417,6 +427,18 @@ public class ScriptManager : MonoBehaviour
 
     private void ExitScripts()
     {
+        List<LoadJson.Script> tempscripts = LoadJson.scriptDic[m_scriptName];
+        if (tempscripts.Count - 1 == m_scriptNum)
+        {
+            m_last = m_scriptName;
+
+            if (m_last == "wanso")
+            {
+                // 페이드아웃하면 될 듯
+            }
+        }
+
+
         m_isFinished = false;
         m_isSelect = false;
         m_pointer = false;
